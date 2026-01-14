@@ -1,5 +1,5 @@
 name: Feature Request
-description: Propose a new idea for # STARTBTC
+description: Propose a new idea for btcstart
 body:
   - type: markdown
     attributes:

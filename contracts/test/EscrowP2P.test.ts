@@ -70,13 +70,13 @@ describe("EscrowP2P - Comprehensive Test Suite", function () {
                 .withArgs(1, buyer.address, seller.address, amount, await time.latest() + expiration + 1);
         });
 
-        it("Should transfer USDC from seller to contract", async function () {
-            const { escrow, usdc, buyer, seller } = await loadFixture(deployEscrowFixture);
+        it("Should transfer USDC from seller to contract (via totalPrincipal)", async function () {
+            const { escrow, buyer, seller } = await loadFixture(deployEscrowFixture);
             const amount = ethers.parseUnits("100", 6);
 
-            const balanceBefore = await usdc.balanceOf(await escrow.getAddress());
+            const balanceBefore = await escrow.totalPrincipal();
             await escrow.connect(buyer).createOrder(seller.address, amount, 3600);
-            const balanceAfter = await usdc.balanceOf(await escrow.getAddress());
+            const balanceAfter = await escrow.totalPrincipal();
 
             expect(balanceAfter - balanceBefore).to.equal(amount);
         });
@@ -315,13 +315,13 @@ describe("EscrowP2P - Comprehensive Test Suite", function () {
                 .withArgs(orderId, true);
         });
 
-        it("Should refund seller when resolved in favor of buyer", async function () {
+        it("Should refund seller when resolved in favor of seller", async function () {
             const { escrow, usdc, buyer, seller, arbiter, orderId, amount } = await loadFixture(confirmedOrderFixture);
 
             await escrow.connect(buyer).disputeOrder(orderId);
 
             const balanceBefore = await usdc.balanceOf(seller.address);
-            await escrow.connect(arbiter).resolveDispute(orderId, true);
+            await escrow.connect(arbiter).resolveDispute(orderId, false);
             const balanceAfter = await usdc.balanceOf(seller.address);
 
             expect(balanceAfter - balanceBefore).to.equal(amount);
@@ -339,29 +339,15 @@ describe("EscrowP2P - Comprehensive Test Suite", function () {
             expect(repAfter).to.equal(0); // 0 - 5 -> 0
         });
 
-        it("Should give USDC to buyer when resolved in favor of seller", async function () {
+        it("Should give USDC to buyer when resolved in favor of buyer", async function () {
             const { escrow, usdc, buyer, seller, arbiter, orderId, amount } = await loadFixture(confirmedOrderFixture);
 
             await escrow.connect(buyer).disputeOrder(orderId);
 
             const balanceBefore = await usdc.balanceOf(buyer.address);
-            await escrow.connect(arbiter).resolveDispute(orderId, false);
+            await escrow.connect(arbiter).resolveDispute(orderId, true);
             const balanceAfter = await usdc.balanceOf(buyer.address);
 
-            // Al resolver disputa a favor del comprador, se asume que se transfiere
-            // el monto acordado. En este diseño, si disputa => seller falló?
-            // Si el árbitro decide "Dar USDC al buyer", el contrato ejecuta la transferencia.
-            // ¿Debería cobrar fee en disputa?
-            // El código actual EscrowP2P usa safeTransfer(order.buyer, order.amount) en resolveDispute.
-            // NO está usando la lógica de fee ahí. 
-            // Reviso el contrato....
-            // Sí, resolveDispute transfiere `order.amount`.
-            // Por consistencia, si el buyer pagó fiat, debería recibir lo que compró.
-            // Pero si en el flujo normal cobramos fee... aquí recibire MÁS que en flujo normal.
-            // CORRECCION: El contrato EscrowP2P.sol modificado SOLO aplicó fee en `releaseToSeller`.
-            // En `resolveDispute` (favorBuyer) transfiere el TOTAL.
-            // Esto es inconsistente pero "amigable" para el usuario disputante.
-            // Dejamos el test esperando el monto TOTAL por ahora.
             expect(balanceAfter - balanceBefore).to.equal(amount);
         });
     });
@@ -376,9 +362,9 @@ describe("EscrowP2P - Comprehensive Test Suite", function () {
         }
 
         it("Should allow canceling expired order", async function () {
-            const { escrow, orderId } = await loadFixture(expiredOrderFixture);
+            const { escrow, orderId, seller } = await loadFixture(expiredOrderFixture);
 
-            await expect(escrow.cancelOrder(orderId))
+            await expect(escrow.connect(seller).cancelOrder(orderId))
                 .to.emit(escrow, "OrderRefunded")
                 .withArgs(orderId);
         });
@@ -387,7 +373,7 @@ describe("EscrowP2P - Comprehensive Test Suite", function () {
             const { escrow, usdc, seller, orderId, amount } = await loadFixture(expiredOrderFixture);
 
             const balanceBefore = await usdc.balanceOf(seller.address);
-            await escrow.cancelOrder(orderId);
+            await escrow.connect(seller).cancelOrder(orderId);
             const balanceAfter = await usdc.balanceOf(seller.address);
 
             expect(balanceAfter - balanceBefore).to.equal(amount);
@@ -399,7 +385,7 @@ describe("EscrowP2P - Comprehensive Test Suite", function () {
             await escrow.connect(buyer).createOrder(seller.address, amount, 3600);
 
             await expect(
-                escrow.cancelOrder(1)
+                escrow.connect(seller).cancelOrder(1)
             ).to.be.revertedWith("Not expired");
         });
     });

@@ -84,7 +84,7 @@ describe("EscrowP2P - Aave Integration (Liquidity Mining)", function () {
     });
 
     it("Should allow treasury to claim generated yield", async function () {
-        const { escrow, usdc, aUsdc, seller, buyer, treasury, pool } = await loadFixture(deployAaveFixture);
+        const { escrow, usdc, aUsdc, seller, buyer, treasury, pool, owner } = await loadFixture(deployAaveFixture);
         const amount = ethers.parseUnits("1000", 6); // $1000
 
         await escrow.connect(buyer).createOrder(seller.address, amount, 3600);
@@ -106,7 +106,7 @@ describe("EscrowP2P - Aave Integration (Liquidity Mining)", function () {
 
         // Claim Yield
         // We need to pass the aToken address
-        await escrow.connect(treasury).claimYield(await aUsdc.getAddress()); // Actually admin role, which is owner/deployer?
+        await escrow.connect(owner).claimYield(await aUsdc.getAddress()); // Owner is admin
         // Treasury address is just where funds go. msg.sender must be DEFAULT_ADMIN_ROLE.
         // In fixture: _grantRole(DEFAULT_ADMIN, msg.sender) -> Owner.
         // So we call with 'owner' (default signer).

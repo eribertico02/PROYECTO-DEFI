@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug to help us improve # STARTBTC
+description: Report a bug to help us improve btcstart
 body:
   - type: markdown
     attributes:

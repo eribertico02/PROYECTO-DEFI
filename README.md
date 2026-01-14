@@ -1,4 +1,4 @@
-# # STARTBTC - Proyecto Completo de Código Abierto
+# btcstart - Proyecto Completo de Código Abierto
 ## 🌐 DeFi P2P Protocol - Banca sin Permiso para Mercados Emergentes
 
 > [!NOTE]
@@ -251,4 +251,4 @@ MIT License - ver [LICENSE](LICENSE)
 
 **⚠️ Disclaimer**: Este proyecto está en desarrollo activo. No usar en producción sin auditoría completa de seguridad.
 
-**Estado actual**: MVP de Smart Contracts - EscrowP2P completado y testeado ✅
+**Estado actual**: MVP de Smart Contracts - EscrowP2P completado y testeado ✅ - Parte de btcstart

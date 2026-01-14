@@ -98,9 +98,10 @@ contract EscrowP2P is ReentrancyGuard, Pausable, AccessControl {
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
     
-    event OrderCreated(uint256 indexed orderId, address indexed buyer, address indexed seller, uint256 amount);
-    event OrderCompelted(uint256 indexed orderId); // Typo fixed in next version if possible, keeping consistency
-    event OrderDisputed(uint256 indexed orderId, address indexed disputer);
+    event OrderCreated(uint256 indexed orderId, address indexed buyer, address indexed seller, uint256 amount, uint256 expiresAt);
+    event OrderCompleted(uint256 indexed orderId);
+    event PaymentConfirmed(uint256 indexed orderId, string proof);
+    event DisputeRaised(uint256 indexed orderId, address indexed disputer);
     event DisputeResolved(uint256 indexed orderId, bool favorBuyer);
     event OrderRefunded(uint256 indexed orderId);
     event ReputationUpdated(address indexed seller, uint256 newReputation);
@@ -160,8 +161,8 @@ contract EscrowP2P is ReentrancyGuard, Pausable, AccessControl {
         require(seller != address(0), "Invalid seller");
         require(whitelist[seller], "Seller not whitelisted"); // Ensure seller is also verified
         require(seller != msg.sender, "Buyer cannot be seller");
-        require(amount > 0, "Amount > 0");
-        require(expirationTime >= MIN_EXPIRATION_TIME && expirationTime <= MAX_EXPIRATION_TIME, "Invalid expiration");
+        require(amount > 0, "Amount must be > 0");
+        require(expirationTime >= MIN_EXPIRATION_TIME && expirationTime <= MAX_EXPIRATION_TIME, "Invalid expiration time");
 
         // 1. Transferir USDC del Seller -> Contrato
         usdc.safeTransferFrom(seller, address(this), amount);
@@ -184,7 +185,7 @@ contract EscrowP2P is ReentrancyGuard, Pausable, AccessControl {
             fiatPaymentProof: ""
         });
 
-        emit OrderCreated(orderId, msg.sender, seller, amount);
+        emit OrderCreated(orderId, msg.sender, seller, amount, orders[orderId].expiresAt);
         return orderId;
     }
 
@@ -193,8 +194,8 @@ contract EscrowP2P is ReentrancyGuard, Pausable, AccessControl {
      */
     function releaseToSeller(uint256 orderId) external nonReentrant whenNotPaused {
         Order storage order = orders[orderId];
-        require(msg.sender == order.seller, "Only seller can release");
-        require(order.state == State.AWAITING_PAYMENT || order.state == State.DISPUTED, "Invalid state");
+        require(msg.sender == order.seller, "Only seller");
+        require(order.state == State.AWAITING_PAYMENT || order.state == State.AWAITING_DELIVERY || order.state == State.DISPUTED, "Invalid state");
         require(block.timestamp <= order.expiresAt || order.state == State.DISPUTED, "Order expired");
 
         order.state = State.COMPLETE;
@@ -216,7 +217,7 @@ contract EscrowP2P is ReentrancyGuard, Pausable, AccessControl {
         }
         
         _updateReputation(order.seller, true);
-        emit OrderCompelted(orderId);
+        emit OrderCompleted(orderId);
     }
 
     // ... (markAsPaid omitted for brevity if unchanged, but keeping context usually safe)
@@ -224,16 +225,20 @@ contract EscrowP2P is ReentrancyGuard, Pausable, AccessControl {
          Order storage order = orders[orderId];
          require(msg.sender == order.buyer, "Only buyer");
          require(order.state == State.AWAITING_PAYMENT, "Invalid state");
+         require(bytes(proof).length > 0, "Payment proof required");
+         require(block.timestamp <= order.expiresAt, "Order expired");
          
          order.fiatPaymentProof = proof;
-         // No cambia estado, pero notifica
+         order.state = State.AWAITING_DELIVERY;
+         emit PaymentConfirmed(orderId, proof);
     }
 
-    function disputeOrder(uint256 orderId) external nonReentrant onlyOrderParticipant(orderId) {
+    function disputeOrder(uint256 orderId) external nonReentrant {
         Order storage order = orders[orderId];
-        require(order.state == State.AWAITING_PAYMENT, "Invalid state");
+        require(msg.sender == order.buyer || msg.sender == order.seller, "Only buyer or seller");
+        require(order.state == State.AWAITING_PAYMENT || order.state == State.AWAITING_DELIVERY, "Invalid state");
         order.state = State.DISPUTED;
-        emit OrderDisputed(orderId, msg.sender);
+        emit DisputeRaised(orderId, msg.sender);
     }
 
     function resolveDispute(uint256 orderId, bool favorBuyer) external onlyRole(ARBITER_ROLE) nonReentrant {
@@ -267,7 +272,7 @@ contract EscrowP2P is ReentrancyGuard, Pausable, AccessControl {
         require(order.state == State.AWAITING_PAYMENT, "Invalid state");
         
         if (msg.sender == order.seller) {
-            require(block.timestamp > order.expiresAt, "Order not expired");
+            require(block.timestamp > order.expiresAt, "Not expired");
         }
         
         // Retirar de Aave

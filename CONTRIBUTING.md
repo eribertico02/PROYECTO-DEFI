@@ -1,6 +1,6 @@
-# Contribuyendo a # STARTBTC
+# Contribuyendo a btcstart 🚀
 
-¡Gracias por tu interés en contribuir a **# STARTBTC**! Este es un proyecto de código abierto dedicado a proporcionar infraestructura financiera sin intermediarios para mercados emergentes.
+¡Gracias por tu interés en contribuir a **btcstart**! Este es un proyecto de código abierto dedicado a proporcionar infraestructura financiera sin intermediarios para mercados emergentes.
 
 ## 🌟 Nuestra Visión
 

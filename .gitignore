@@ -13,6 +13,10 @@ coverage/
 *.key
 *.pem
 *.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!capacitor.config.json
 
 # IDEs
 .vscode/
