@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-dark: #000000;
+  --color-brand-gold: #D4AF37;
+  --color-brand-gold-muted: rgba(212, 175, 55, 0.15);
+  --color-brand-gold-bright: #FFD700;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-brand-dark);
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  .btn-gold {
+    @apply px-6 py-3 bg-brand-gold hover:bg-brand-gold-bright text-black rounded-xl font-black transition-all shadow-lg shadow-brand-gold/20 active:scale-95 cursor-pointer uppercase tracking-widest text-sm;
+  }
+
+  .btn-gold-outline {
+    @apply px-6 py-3 border-2 border-brand-gold/30 hover:border-brand-gold text-brand-gold rounded-xl font-bold transition-all active:scale-95 cursor-pointer uppercase tracking-widest text-xs;
+  }
+
+  .card-solaris {
+    @apply bg-zinc-950/80 backdrop-blur-xl rounded-3xl p-8 border border-brand-gold/10 shadow-2xl relative overflow-hidden;
+  }
+
+  .matrix-bg {
+    background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)),
+      url('https://www.transparenttextures.com/patterns/dark-matter.png');
+  }
+}
+
+/* Subtle Golden Matrix Rain Animation */
+.matrix-rain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.05;
+  background: linear-gradient(180deg, transparent 0%, var(--color-brand-gold) 50%, transparent 100%);
+  background-size: 1px 200%;
+  animation: rain 20s linear infinite;
+}
+
+@keyframes rain {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  100% {
+    background-position: 0% 100%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-solaris-in {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-gold);
+}

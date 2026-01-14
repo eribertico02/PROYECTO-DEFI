@@ -1,0 +1,34 @@
+# Hardhat
+node_modules/
+artifacts/
+cache/
+typechain-types/
+coverage/
+coverage.json
+
+# Secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Build
+dist/
+build/
+out/
+
+# Testing
+.nyc_output/

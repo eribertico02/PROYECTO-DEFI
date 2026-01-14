@@ -1,0 +1,22 @@
+# General
+.DS_Store
+*.log
+node_modules/
+dist/
+build/
+coverage/
+
+# Secrets - CRITICAL
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.json
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
