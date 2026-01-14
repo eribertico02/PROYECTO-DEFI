@@ -1,5 +1,8 @@
-# 🌐 DeFi P2P Protocol
-## Banca sin Permiso para Mercados Emergentes
+# # STARTBTC - Proyecto Completo de Código Abierto
+## 🌐 DeFi P2P Protocol - Banca sin Permiso para Mercados Emergentes
+
+> [!NOTE]
+> **Espejo del Proyecto**: Este repositorio es un espejo (mirror) para seguir el desarrollo en tiempo real. Invitamos a la comunidad a contribuir, auditar y clonar este entorno para fortalecer la libertad financiera en mercados emergentes.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.20-blue)](https://soliditylang.org/)

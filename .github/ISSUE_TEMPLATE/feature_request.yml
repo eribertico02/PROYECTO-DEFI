@@ -1,0 +1,26 @@
+name: Feature Request
+description: Propose a new idea for # STARTBTC
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¿Tienes una mejora para el protocolo? ¡Cuéntanos!
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Descripción de la Funcionalidad
+      description: Una descripción clara y concisa de la mejora que propones.
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Por qué es importante
+      description: ¿Cómo beneficia esto a los usuarios de mercados emergentes?
+    validations:
+      required: true
+  - type: textarea
+    id: implementation-ideas
+    attributes:
+      label: Ideas para la Implementación
+      description: Si tienes ideas técnicas, compártelas.
